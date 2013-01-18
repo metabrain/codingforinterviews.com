@@ -31,30 +31,23 @@ public class Tree<T extends Comparable<T>> {
 	}
 	
 	public boolean remove(T elem, Tree parent) { //pass parent along in case we need to remove current node that becomes empty
-		if(root==null) //didnt find any, failed
-			return false ; 
-
 		if(elem.compareTo(root)==0) { 
 			//remove root and replace with maximum from left 
 			// or minimum from right if left is empty
 			T newroot = null ;
 			if(left!=null) {
-				newroot = left.maximum() ;
-				
+				newroot = left.maximum() ;				
 				left.remove(newroot,this);  //remove old value that now is root from left branch
 			}
 			else if(right!=null) {
-				newroot = right.minimum() ;
-				
+				newroot = right.minimum() ;				
 				right.remove(newroot,this);  //remove old value that now is root from left branch
 			}
 
-			root = newroot ;
-			
-			if(isEmpty())
+			root = newroot ;			
+			if(isEmpty()) //if this tree is dangling, go to parent and remove me. GC will do the rest.
 				parent.deleteEmpty();
-				
-			checkConsistency("before return true");
+
 			return true ; //removed			
 		}
 		
@@ -97,7 +90,6 @@ public class Tree<T extends Comparable<T>> {
 		}
 		
 		if(root.compareTo(elem)==0) {
-			System.out.println("found");
 			return true ;
 		}
 

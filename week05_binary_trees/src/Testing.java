@@ -44,7 +44,7 @@ public class Testing {
 		
 		//################# REMOVAL ##############
 
-		int N_REMOVED = (int)((double)N_TESTS/1.1) ;
+		int N_REMOVED = (int)((double)N_TESTS/1.0005) ;
 		
 		for(int i = 0 ; i < N_REMOVED ; i++) {
 			int to_remove = (int)((double)used_numbers.size()*Math.random()) ;
