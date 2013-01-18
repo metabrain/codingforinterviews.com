@@ -11,7 +11,7 @@ public class Testing {
 	public static void main(String[] args) throws Exception {
 		Tree<Integer> tree = new Tree<Integer>(); 
 		
-		int N_TESTS = 100000 ;
+		int N_TESTS = 10000 ;
 		
 		List<Integer> used_numbers = new ArrayList<Integer>(N_TESTS+2) ;
 
@@ -21,13 +21,8 @@ public class Testing {
 			used_numbers.add(num) ;
 		}
 		
-		File f = new File("test.txt") ;
-		
-		PrintStream out = new PrintStream(f) ;
-		
-		tree.printInOrder(out) ;
-		
-		out.flush();
+		File f = new File("test.txt") ;		
+		printToFile(tree, f) ;
 		
 		Scanner in = new Scanner(f) ;
 		
@@ -45,22 +40,27 @@ public class Testing {
 			System.out.println("inOrder has less/more elements before removals!") ;
 			return ;
 		}			
+		System.out.println("Consistency? "+tree.checkConsistency("before removal"));
 		
-		
-//		f.delete();
-//		f.createNewFile();
+		//################# REMOVAL ##############
 
-		int N_REMOVED = (int)((double)N_TESTS/1.5) ;
+		int N_REMOVED = (int)((double)N_TESTS/1.1) ;
 		
 		for(int i = 0 ; i < N_REMOVED ; i++) {
 			int to_remove = (int)((double)used_numbers.size()*Math.random()) ;
-			if(used_numbers.get(to_remove)==null)
-				System.err.println("yep null") ;
-			tree.remove(used_numbers.get(to_remove)) ;
-			count--;
+			boolean removal_result = tree.remove(used_numbers.get(to_remove),null) ;
+			
+//			if(removal_result)
+//			System.err.println("failed removal...");
+			
+			used_numbers.remove(to_remove);
 		}
 		System.out.printf("Removed %d entries.\n",N_REMOVED);
-
+		System.out.println("Consistency? "+tree.checkConsistency("after removal"));
+		
+		f = new File("test2.txt") ;		
+		printToFile(tree, f) ;
+		
 		in = new Scanner(f) ;
 		
 		last = Integer.MIN_VALUE ;
@@ -79,9 +79,14 @@ public class Testing {
 			return ;
 		}	
 		
-		
-		
-		
 		System.out.println("Correct!");
+	}
+	
+	public static void printToFile(Tree tree, File f) throws Exception {
+		f.delete();
+		f.createNewFile();
+		PrintStream out = new PrintStream(f) ;
+		tree.printInOrder(out) ;		
+		out.flush();
 	}
 }

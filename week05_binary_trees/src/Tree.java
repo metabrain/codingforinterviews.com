@@ -30,52 +30,51 @@ public class Tree<T extends Comparable<T>> {
 		}		
 	}
 	
-	public boolean remove(T elem) {
-//		System.out.println("elem="+elem);
-		if(elem==null)
-			System.err.println(elem);
-		
+	public boolean remove(T elem, Tree parent) { //pass parent along in case we need to remove current node that becomes empty
 		if(root==null) //didnt find any, failed
 			return false ; 
 
-		try{
-		if(elem==root) { 
+		if(elem.compareTo(root)==0) { 
 			//remove root and replace with maximum from left 
 			// or minimum from right if left is empty
-
 			T newroot = null ;
-			if(left!=null && (newroot=left.maximum())!=null){
-				left.remove(newroot);  //remove old value that now is root from left branch
+			if(left!=null) {
+				newroot = left.maximum() ;
 				
-				if(left.isEmpty()) //if after removal the sub tree is empty, remove it. GC: deal with it.
-					left = null ; 
+				left.remove(newroot,this);  //remove old value that now is root from left branch
 			}
-			else if(right!=null && (newroot=right.minimum())!=null){
-				right.remove(newroot) ; //remove old value that now is root from left branch
+			else if(right!=null) {
+				newroot = right.minimum() ;
 				
-				if(right.isEmpty()) //if after removal the sub tree is empty, remove it. GC: deal with it.
-					right = null ; 
+				right.remove(newroot,this);  //remove old value that now is root from left branch
 			}
 
 			root = newroot ;
+			
+			if(isEmpty())
+				parent.deleteEmpty();
+				
+			checkConsistency("before return true");
 			return true ; //removed			
 		}
 		
 		else if(elem.compareTo(root) <= 0 && left!=null) //if its lowest and doesnt exist branch, elem doesnt exist for removal
-			return left.remove(elem) ;
+			return left.remove(elem,this) ;
 		else if(/*elem.compareTo(root) > 0 &&*/ right!=null) //remove from right if exists
-			return right.remove(elem) ;
-		} catch (Exception o) {
-			System.out.println("root="+root);
-			System.out.println("left="+left);
-			System.out.println("elem="+elem);
-		}
+			return right.remove(elem,this) ;
 		
 		return false ; //left and right were nulls or just not found/doesnt exist in tree
 	}
 
 	public boolean isEmpty() {
 		return root==null && left==null && right==null ;
+	}
+	
+	public void deleteEmpty() {
+		if(left!=null && left.isEmpty())
+			left = null ;
+		if(right!=null && right.isEmpty())
+			right = null ;
 	}
 	
 	public T maximum() {
@@ -97,7 +96,8 @@ public class Tree<T extends Comparable<T>> {
 			return false ;
 		}
 		
-		if(root==elem) {
+		if(root.compareTo(elem)==0) {
+			System.out.println("found");
 			return true ;
 		}
 
@@ -129,8 +129,7 @@ public class Tree<T extends Comparable<T>> {
 	
 	public T lca(T node1, T node2) {
 		//assuming the nodes are in the tree
-		//or else we would complicate the code with even more checks...
-		
+		//or else we would complicate the code with even more checks...		
 		boolean leftHas = false ;
 		boolean rightHas = false ;
 		
@@ -143,9 +142,9 @@ public class Tree<T extends Comparable<T>> {
 		//checking the varios scenarios possible (see the pictures)
 		if(leftHas && rightHas)
 			return root ;
-		if(leftHas && (left.root==node1 || left.root==node2) )
+		if(leftHas && (left.root.compareTo(node1)==0 || left.root.compareTo(node2)==0) )
 			return root ;
-		if(rightHas && (right.root==node1 || right.root==node2) )
+		if(rightHas && (right.root.compareTo(node1)==0 || right.root.compareTo(node2)==0) )
 			return root ;
 		
 		//if so far no condition was hit, we have to go deeper...
@@ -159,5 +158,14 @@ public class Tree<T extends Comparable<T>> {
 			return right.lca(node1, node2);
 	}
 	
-	
+	public boolean checkConsistency(String s) {
+		if(root==null && (left!=null || right!=null)){
+			System.err.println("SCENARIO: "+s+"\troot:"+root+" left:"+left+" right:"+right);
+			System.err.flush();
+			return false ; //root null and branches not null?!
+		}
+						
+		return (left==null || left.checkConsistency(s)) &&
+				(right==null || right.checkConsistency(s)) ;
+	}
 }
